@@ -1,0 +1,34 @@
+{
+  "global": {
+    "escenario": "experimento_A"
+  },
+
+  "generador_layout": {
+    "seed": 67,
+    "ancho": 700,
+    "alto": 300,
+    "estaciones": 10
+  },
+
+  "generador_pedidos": {
+    "seed": 67,
+    "pedidos": 600,
+    "burst": true
+  },
+
+  "demo_final": {
+    "seed": 67,
+    "robots": 20,
+    "ticks": 10000
+  },
+
+  "visualiza_simulacion": {
+    "seed": 67,
+    "robots": 20,
+    "ticks": 10000,
+    "pasos_por_frame": 25,
+    "fps": 20,
+    "ffmpeg_path": "C:\\Users\\Jaaziel\\Downloads\\ffmpeg-master-latest-win64-gpl-shared\\ffmpeg-master-latest-win64-gpl-shared\\bin\\ffmpeg.exe",
+    "normalizar_pedidos": true
+  }
+}
