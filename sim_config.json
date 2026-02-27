@@ -1,6 +1,6 @@
 {
   "global": {
-    "escenario": "experimento_A"
+    "escenario": "experimento_D"
   },
 
   "generador_layout": {
@@ -28,7 +28,7 @@
     "ticks": 10000,
     "pasos_por_frame": 25,
     "fps": 20,
-    "ffmpeg_path": "C:\\Users\\Jaaziel\\Downloads\\ffmpeg-master-latest-win64-gpl-shared\\ffmpeg-master-latest-win64-gpl-shared\\bin\\ffmpeg.exe",
+    "ffmpeg_path": "C:\\Users\\ricar\\Desktop\\IT\\ffmpeg-master-latest-win64-gpl-shared\\ffmpeg-master-latest-win64-gpl-shared\\bin\\ffmpeg.exe",
     "normalizar_pedidos": true
   }
 }

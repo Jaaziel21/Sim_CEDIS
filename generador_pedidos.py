@@ -91,7 +91,7 @@ def main():
 
         if args.burst:
             if rng.random() < 0.70:
-                tick_creacion = int(rng.integers(0, 2001))
+                tick_creacion = int(rng.integers(8000, 10001))
             else:
                 tick_creacion = int(rng.integers(0, 10001))
         else:
