@@ -1,6 +1,6 @@
 {
   "global": {
-    "escenario": "experimento_D"
+    "escenario": "experimento_A"
   },
 
   "generador_layout": {
@@ -12,13 +12,13 @@
 
   "generador_pedidos": {
     "seed": 67,
-    "pedidos": 600,
-    "burst": true
+    "pedidos": 6000,
+    "burst": false
   },
 
   "demo_final": {
     "seed": 67,
-    "robots": 20,
+    "robots": 210,
     "ticks": 10000
   },
 

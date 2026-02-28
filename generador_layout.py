@@ -203,7 +203,7 @@ def generar_layout(seed: int, ancho: int, alto: int, estaciones: int) -> Dict:
             if grid[yy, xx] == LIBRE:
                 spawn_points.append((xx, yy))
     rng.shuffle(spawn_points)
-    spawn_points = spawn_points[:200]
+    spawn_points = spawn_points[:800]
 
     # Validar alcanzabilidad: desde el primer spawn, docks alcanzables
     if not spawn_points:
