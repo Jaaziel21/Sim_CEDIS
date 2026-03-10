@@ -3,14 +3,14 @@
   "tick_final": 10000,
   "robots": 210,
   "pedidos_totales": 6000,
-  "pedidos_completados": 2175,
-  "tiempo_promedio_pedido_ticks": 2394.0703448275863,
-  "throughput_pedidos_por_1000_ticks": 217.5,
-  "tiempo_promedio_espera_ticks": 418.5,
-  "utilizacion_promedio": 0.8867628571428572,
+  "pedidos_completados": 2901,
+  "tiempo_promedio_pedido_ticks": 1674.1458117890384,
+  "throughput_pedidos_por_1000_ticks": 290.1,
+  "tiempo_promedio_espera_ticks": 590.1142857142858,
+  "utilizacion_promedio": 0.8875833333333334,
   "colisiones_vertice": 0,
   "intercambios_arista": 0,
   "deadlock": 0,
-  "eventos_alto": 87885,
-  "distancia_total_celdas": 1772142
+  "eventos_alto": 123924,
+  "distancia_total_celdas": 1737100
 }

@@ -151,6 +151,19 @@ class SimAlmacen:
         self.conteo_deadlock = 0
         self.eventos_alto = 0
 
+        self.zonas = {
+            "zona_1": (5, 220, 150, 290),
+            "zona_2": (240, 460, 0, 140),
+            "zona_3": (470, 690, 150, 290)
+        }
+
+        self.capacidad_zonas = {
+            "zona_1": 40,
+            "zona_2": 40,
+            "zona_3": 40
+        }
+
+
         # Gestión de pedidos
         self.pendientes: List[int] = []  # índices en self.pedidos
         self.no_liberados = sorted(range(len(self.pedidos)), key=lambda i: self.pedidos[i].tick_creacion)
@@ -174,13 +187,16 @@ class SimAlmacen:
             mejor_dist = 10**9
 
             # Considerar solo los primeros N en cola (localidad / performance)
-            for pi in self.pendientes[: min(50, len(self.pendientes))]:
+            for pi in self.pendientes:
                 p = self.pedidos[pi]
                 anaquel = self.anaquel_home[p.anaquel_id]
                 pickup = elegir_objetivo_adyacente(self.grid, anaquel)
                 if pickup is None:
                     continue
-                dist = abs(r.pos[0] - pickup[0]) + abs(r.pos[1] - pickup[1])
+                dist_robot_rack = abs(r.pos[0] - pickup[0]) + abs(r.pos[1] - pickup[1])
+                dist_rack_estacion = abs(pickup[0] - self.estacion_dock[p.estacion_id][0]) + abs(pickup[1] - self.estacion_dock[p.estacion_id][1])
+                dist = dist_robot_rack + dist_rack_estacion
+
                 if dist < mejor_dist:
                     mejor_dist = dist
                     mejor_idx = pi
@@ -267,6 +283,14 @@ class SimAlmacen:
             r.ruta = []
             r.idx_ruta = 0
 
+    def obtener_zona(self, pos):
+        x, y = pos
+        for nombre, (xmin, xmax, ymin, ymax) in self.zonas.items():
+            if xmin <= x <= xmax and ymin <= y <= ymax:
+                return nombre
+        return None
+
+
     def step(self) -> None:
         self._liberar_pedidos()
         self._asignar_pedidos()
@@ -291,31 +315,84 @@ class SimAlmacen:
         tick_siguiente = self.tick + 1
         movio_alguien = False
 
-        # Orden determinista: robot_id ascendente
+        # =====================================================
+        # Conteo actual de robots por zona
+        # =====================================================
+        conteo_zonas = {z: 0 for z in self.zonas}
+
+        for robot in self.lista_robots:
+            zona = self.obtener_zona(robot.pos)
+            if zona:
+                conteo_zonas[zona] += 1
+
+        # =====================================================
+        # Confirmación de movimientos (orden determinista)
+        # =====================================================
         for r in self.lista_robots:
             actual = r.pos
             siguiente = propuestas[r.robot_id]
 
             if siguiente == actual:
-                self.tabla_reservas.confirmar_espera(r.robot_id, actual, tick_siguiente)
+                self.tabla_reservas.confirmar_espera(
+                    r.robot_id, actual, tick_siguiente
+                )
                 continue
 
             if self.tabla_reservas.puede_moverse(actual, siguiente, tick_siguiente):
-                self.tabla_reservas.confirmar_movimiento(r.robot_id, actual, siguiente, tick_siguiente)
+
+                zona_actual = self.obtener_zona(actual)
+                zona_siguiente = self.obtener_zona(siguiente)
+
+                # -------------------------------------------------
+                # Control de capacidad de zona (solo entrada)
+                # -------------------------------------------------
+                if zona_siguiente and zona_actual != zona_siguiente:
+                    capacidad = self.capacidad_zonas.get(zona_siguiente, None)
+
+                    if (
+                        capacidad is not None
+                        and conteo_zonas[zona_siguiente] >= capacidad
+                    ):
+                        r.ticks_espera += 1
+                        self.eventos_alto += 1
+                        self.tabla_reservas.confirmar_espera(
+                            r.robot_id, actual, tick_siguiente
+                        )
+                        continue
+
+                # -------------------------------------------------
+                # Movimiento confirmado
+                # -------------------------------------------------
+                self.tabla_reservas.confirmar_movimiento(
+                    r.robot_id, actual, siguiente, tick_siguiente
+                )
+
+                # Actualizar conteo después del movimiento
+                if zona_actual and zona_actual != zona_siguiente:
+                    conteo_zonas[zona_actual] -= 1
+
+                if zona_siguiente and zona_actual != zona_siguiente:
+                    conteo_zonas[zona_siguiente] += 1
+
                 r.pos = siguiente
                 r.idx_ruta += 1
                 r.celdas_movidas += 1
                 movio_alguien = True
+
             else:
                 r.ticks_espera += 1
                 self.eventos_alto += 1
-                self.tabla_reservas.confirmar_espera(r.robot_id, actual, tick_siguiente)
+                self.tabla_reservas.confirmar_espera(
+                    r.robot_id, actual, tick_siguiente
+                )
 
-        # Heurística de deadlock: nadie se movió pero al menos un robot está ocupado
-        if (not movio_alguien) and any(r.estado != "INACTIVO" for r in self.lista_robots):
+        if (not movio_alguien) and any(
+            r.estado != "INACTIVO" for r in self.lista_robots
+        ):
             self.conteo_deadlock += 1
 
         self.tick = tick_siguiente
+
 
     def run(self, ticks: int) -> None:
         for _ in range(ticks):

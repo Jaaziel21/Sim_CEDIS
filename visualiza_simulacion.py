@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib import animation
+from matplotlib.patches import Rectangle
 from out_paths import asegurar_dirs_de_salidas
 from sim_core import Pedido, SimAlmacen, cargar_layout
 from scenario_config import agregar_argumento_config, aplicar_defaults_desde_config
@@ -183,6 +184,41 @@ def animar(
     ax = plt.gca()
     ax.set_title("Simulación de flota de robots (CEDIS)")
     ax.imshow(img, origin="upper", interpolation="nearest")
+    # -------------------------------------------------
+    # Dibujar zonas (si existen en el simulador)
+    # -------------------------------------------------
+    if hasattr(sim, "zonas"):
+        colores_zonas = [
+            (1.0, 0.0, 0.0, 0.15),   # rojo translúcido
+            (0.0, 0.0, 1.0, 0.15),   # azul translúcido
+            (0.0, 1.0, 0.0, 0.15),   # verde translúcido
+            (1.0, 1.0, 0.0, 0.15),   # amarillo translúcido
+        ]
+
+        for i, (nombre, (xmin, xmax, ymin, ymax)) in enumerate(sim.zonas.items()):
+            color = colores_zonas[i % len(colores_zonas)]
+
+            rect = Rectangle(
+                (xmin, ymin),
+                xmax - xmin,
+                ymax - ymin,
+                linewidth=2,
+                edgecolor=color[:3],
+                facecolor=color,
+            )
+
+            ax.add_patch(rect)
+
+            # Etiqueta de la zona
+            ax.text(
+                xmin + 5,
+                ymin + 15,
+                nombre,
+                color=color[:3],
+                fontsize=10,
+                weight="bold",
+            )
+
     ax.set_xlim(-0.5, ancho - 0.5)
     ax.set_ylim(alto - 0.5, -0.5)
     ax.set_xlabel("x")
